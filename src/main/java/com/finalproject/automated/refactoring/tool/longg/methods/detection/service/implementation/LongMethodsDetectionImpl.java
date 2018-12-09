@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class JavaLongMethodsDetection implements LongMethodsDetection {
+public class LongMethodsDetectionImpl implements LongMethodsDetection {
 
     @Autowired
     private LocsDetection locsDetection;

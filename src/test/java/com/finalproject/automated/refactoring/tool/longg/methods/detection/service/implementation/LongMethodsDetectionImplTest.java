@@ -30,10 +30,10 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class JavaLongMethodsDetectionTest {
+public class LongMethodsDetectionImplTest {
 
     @Autowired
-    private JavaLongMethodsDetection longMethodsDetection;
+    private LongMethodsDetectionImpl longMethodsDetection;
 
     @MockBean
     private LocsDetection locsDetection;
