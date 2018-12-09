@@ -3,6 +3,7 @@ package com.finalproject.automated.refactoring.tool.longg.methods.detection.serv
 import com.finalproject.automated.refactoring.tool.locs.detection.service.LocsDetection;
 import com.finalproject.automated.refactoring.tool.longg.methods.detection.service.LongMethodsDetection;
 import com.finalproject.automated.refactoring.tool.model.MethodModel;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class JavaLongMethodsDetection implements LongMethodsDetection {
+public class LongMethodsDetectionImpl implements LongMethodsDetection {
 
     @Autowired
     private LocsDetection locsDetection;
@@ -25,7 +26,7 @@ public class JavaLongMethodsDetection implements LongMethodsDetection {
     private static final Integer FIRST_INDEX = 0;
 
     @Override
-    public MethodModel detect(MethodModel methodModel, Long threshold) {
+    public MethodModel detect(@NonNull MethodModel methodModel, @NonNull Long threshold) {
         try {
             return detect(Collections.singletonList(methodModel), threshold)
                     .get(FIRST_INDEX);
@@ -35,7 +36,7 @@ public class JavaLongMethodsDetection implements LongMethodsDetection {
     }
 
     @Override
-    public List<MethodModel> detect(List<MethodModel> methodModels, Long threshold) {
+    public List<MethodModel> detect(@NonNull List<MethodModel> methodModels, @NonNull Long threshold) {
         return methodModels.stream()
                 .map(this::detectLoc)
                 .filter(methodModel -> isLongMethod(methodModel, threshold))
@@ -50,6 +51,6 @@ public class JavaLongMethodsDetection implements LongMethodsDetection {
     }
 
     private Boolean isLongMethod(MethodModel methodModel, Long threshold) {
-        return methodModel.getLoc() >= threshold;
+        return methodModel.getLoc() > threshold;
     }
 }
