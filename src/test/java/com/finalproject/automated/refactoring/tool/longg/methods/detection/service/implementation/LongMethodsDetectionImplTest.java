@@ -1,6 +1,7 @@
 package com.finalproject.automated.refactoring.tool.longg.methods.detection.service.implementation;
 
 import com.finalproject.automated.refactoring.tool.locs.detection.service.LocsDetection;
+import com.finalproject.automated.refactoring.tool.model.CodeSmellName;
 import com.finalproject.automated.refactoring.tool.model.MethodModel;
 import com.finalproject.automated.refactoring.tool.model.PropertyModel;
 import org.junit.Before;
@@ -17,8 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -41,6 +41,7 @@ public class LongMethodsDetectionImplTest {
     private static final Integer FIRST_INDEX = 0;
     private static final Integer SECOND_INDEX = 1;
     private static final Integer LONG_METHOD_COUNT = 1;
+    private static final Integer NORMAL_METHOD_COUNT = 1;
     private static final Integer EMPTY_COUNT = 0;
 
     private static final Long THRESHOLD = 10L;
@@ -61,29 +62,33 @@ public class LongMethodsDetectionImplTest {
 
     @Test
     public void detect_singleMethod_success() {
-        MethodModel methodModel = longMethodsDetection.detect(methodModels.get(SECOND_INDEX), THRESHOLD);
-        assertNotNull(methodModel);
-        assertEquals(methodModels.get(SECOND_INDEX), methodModel);
+        longMethodsDetection.detect(methodModels.get(SECOND_INDEX), THRESHOLD);
+
+        assertEquals(LONG_METHOD_COUNT.intValue(), methodModels.get(SECOND_INDEX).getCodeSmells().size());
+        assertEquals(CodeSmellName.LONG_METHOD, methodModels.get(SECOND_INDEX).getCodeSmells().get(FIRST_INDEX));
     }
 
     @Test
     public void detect_singleMethod_success_notLongMethod() {
-        MethodModel methodModel = longMethodsDetection.detect(methodModels.get(FIRST_INDEX), THRESHOLD);
-        assertNull(methodModel);
+        longMethodsDetection.detect(methodModels.get(FIRST_INDEX), THRESHOLD);
+        assertTrue(methodModels.get(FIRST_INDEX).getCodeSmells().isEmpty());
     }
 
     @Test
     public void detect_multiMethods_success() {
-        List<MethodModel> longMethodModels = longMethodsDetection.detect(methodModels, THRESHOLD);
-        assertEquals(LONG_METHOD_COUNT.intValue(), longMethodModels.size());
-        assertEquals(methodModels.get(SECOND_INDEX), longMethodModels.get(FIRST_INDEX));
+        longMethodsDetection.detect(methodModels, THRESHOLD);
+
+        assertEquals(LONG_METHOD_COUNT.longValue(), getLongMethodsCount().longValue());
+        assertEquals(NORMAL_METHOD_COUNT.longValue(), getNormalMethodsCount().longValue());
     }
 
     @Test
     public void detect_multiMethods_success_notLongMethod() {
         methodModels.remove(SECOND_INDEX.intValue());
-        List<MethodModel> longMethodModels = longMethodsDetection.detect(methodModels, THRESHOLD);
-        assertEquals(EMPTY_COUNT.intValue(), longMethodModels.size());
+        longMethodsDetection.detect(methodModels, THRESHOLD);
+
+        assertEquals(EMPTY_COUNT.longValue(), getLongMethodsCount().longValue());
+        assertEquals(NORMAL_METHOD_COUNT.longValue(), getNormalMethodsCount().longValue());
     }
 
     @Test(expected = NullPointerException.class)
@@ -162,5 +167,22 @@ public class LongMethodsDetectionImplTest {
                 .build());
 
         return methodModels;
+    }
+
+    private Long getLongMethodsCount() {
+        return methodModels.stream()
+                .filter(this::isLongMethod)
+                .count();
+    }
+
+    private Long getNormalMethodsCount() {
+        return methodModels.stream()
+                .filter(methodModel -> !isLongMethod(methodModel))
+                .count();
+    }
+
+    private Boolean isLongMethod(MethodModel methodModel) {
+        return methodModel.getCodeSmells()
+                .contains(CodeSmellName.LONG_METHOD);
     }
 }

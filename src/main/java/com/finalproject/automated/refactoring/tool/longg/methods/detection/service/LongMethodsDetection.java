@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface LongMethodsDetection {
 
-    MethodModel detect(@NonNull MethodModel methodModel, @NonNull Long threshold);
+    void detect(@NonNull MethodModel methodModel, @NonNull Long threshold);
 
-    List<MethodModel> detect(@NonNull List<MethodModel> methodModels, @NonNull Long threshold);
+    void detect(@NonNull List<MethodModel> methodModels, @NonNull Long threshold);
 }

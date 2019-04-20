@@ -2,6 +2,7 @@ package com.finalproject.automated.refactoring.tool.longg.methods.detection.serv
 
 import com.finalproject.automated.refactoring.tool.locs.detection.service.LocsDetection;
 import com.finalproject.automated.refactoring.tool.longg.methods.detection.service.LongMethodsDetection;
+import com.finalproject.automated.refactoring.tool.model.CodeSmellName;
 import com.finalproject.automated.refactoring.tool.model.MethodModel;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author fazazulfikapp
@@ -23,24 +23,17 @@ public class LongMethodsDetectionImpl implements LongMethodsDetection {
     @Autowired
     private LocsDetection locsDetection;
 
-    private static final Integer FIRST_INDEX = 0;
-
     @Override
-    public MethodModel detect(@NonNull MethodModel methodModel, @NonNull Long threshold) {
-        try {
-            return detect(Collections.singletonList(methodModel), threshold)
-                    .get(FIRST_INDEX);
-        } catch (IndexOutOfBoundsException e) {
-            return null;
-        }
+    public void detect(@NonNull MethodModel methodModel, @NonNull Long threshold) {
+        detect(Collections.singletonList(methodModel), threshold);
     }
 
     @Override
-    public List<MethodModel> detect(@NonNull List<MethodModel> methodModels, @NonNull Long threshold) {
-        return methodModels.stream()
+    public void detect(@NonNull List<MethodModel> methodModels, @NonNull Long threshold) {
+        methodModels.parallelStream()
                 .map(this::detectLoc)
                 .filter(methodModel -> isLongMethod(methodModel, threshold))
-                .collect(Collectors.toList());
+                .forEach(this::checkMethod);
     }
 
     private MethodModel detectLoc(MethodModel methodModel) {
@@ -52,5 +45,10 @@ public class LongMethodsDetectionImpl implements LongMethodsDetection {
 
     private Boolean isLongMethod(MethodModel methodModel, Long threshold) {
         return methodModel.getLoc() > threshold;
+    }
+
+    private void checkMethod(MethodModel methodModel) {
+        methodModel.getCodeSmells()
+                .add(CodeSmellName.LONG_METHOD);
     }
 }
