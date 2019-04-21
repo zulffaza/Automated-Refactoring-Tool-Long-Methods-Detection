@@ -20,7 +20,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author fazazulfikapp
@@ -43,6 +43,7 @@ public class LongMethodsDetectionImplTest {
     private static final Integer LONG_METHOD_COUNT = 1;
     private static final Integer NORMAL_METHOD_COUNT = 1;
     private static final Integer EMPTY_COUNT = 0;
+    private static final Integer ONCE_INVOCATION = 1;
 
     private static final Long THRESHOLD = 10L;
     private static final Long FIRST_INDEX_LOC = 2L;
@@ -66,12 +67,20 @@ public class LongMethodsDetectionImplTest {
 
         assertEquals(LONG_METHOD_COUNT.intValue(), methodModels.get(SECOND_INDEX).getCodeSmells().size());
         assertEquals(CodeSmellName.LONG_METHOD, methodModels.get(SECOND_INDEX).getCodeSmells().get(FIRST_INDEX));
+
+        verify(locsDetection, times(ONCE_INVOCATION))
+                .llocDetection(eq(methodModels.get(SECOND_INDEX).getBody()));
+        verifyNoMoreInteractions(locsDetection);
     }
 
     @Test
     public void detect_singleMethod_success_notLongMethod() {
         longMethodsDetection.detect(methodModels.get(FIRST_INDEX), THRESHOLD);
         assertTrue(methodModels.get(FIRST_INDEX).getCodeSmells().isEmpty());
+
+        verify(locsDetection, times(ONCE_INVOCATION))
+                .llocDetection(eq(methodModels.get(FIRST_INDEX).getBody()));
+        verifyNoMoreInteractions(locsDetection);
     }
 
     @Test
@@ -80,6 +89,12 @@ public class LongMethodsDetectionImplTest {
 
         assertEquals(LONG_METHOD_COUNT.longValue(), getLongMethodsCount().longValue());
         assertEquals(NORMAL_METHOD_COUNT.longValue(), getNormalMethodsCount().longValue());
+
+        verify(locsDetection, times(ONCE_INVOCATION))
+                .llocDetection(eq(methodModels.get(FIRST_INDEX).getBody()));
+        verify(locsDetection, times(ONCE_INVOCATION))
+                .llocDetection(eq(methodModels.get(SECOND_INDEX).getBody()));
+        verifyNoMoreInteractions(locsDetection);
     }
 
     @Test
@@ -89,6 +104,10 @@ public class LongMethodsDetectionImplTest {
 
         assertEquals(EMPTY_COUNT.longValue(), getLongMethodsCount().longValue());
         assertEquals(NORMAL_METHOD_COUNT.longValue(), getNormalMethodsCount().longValue());
+
+        verify(locsDetection, times(ONCE_INVOCATION))
+                .llocDetection(eq(methodModels.get(FIRST_INDEX).getBody()));
+        verifyNoMoreInteractions(locsDetection);
     }
 
     @Test(expected = NullPointerException.class)
